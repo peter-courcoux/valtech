@@ -15,8 +15,6 @@ import java.util.Map;
  */
 public class App 
 {
-    private MessageStore store = new MessageStore();
-
     public static void main( String[] args )
     {
         System.out.println( "Valtech" );
@@ -35,6 +33,7 @@ public class App
             System.out.println("Enter command ('enter' for usage details): ");
             String command = c.readLine();
             CommandParser.handleCommand(users, store, command);
+            System.out.println("\n\n");
         }
     }
 }

@@ -41,19 +41,19 @@ public class CommandParser {
      * <p>Single Entry Point for handling submitted commands.
      * </p>
      *
-     * @param users
-     * @param store
-     * @param line
+     * @param users map of users keyed on userid
+     * @param store message store
+     * @param line  command input
      */
     public static void handleCommand(Map<String, User> users, MessageStore store, String line) {
-        if (line.indexOf(QUIT_COMMAND) != -1) {
+        if (line.contains(QUIT_COMMAND)) {
             // exit no error
             System.exit(0);
-        } else if (line.indexOf(POST_COMMAND) != -1) {
+        } else if (line.contains(POST_COMMAND)) {
             handlePost(users, store, line);
-        } else if (line.indexOf(WALL_COMMAND) != -1) {
+        } else if (line.contains(WALL_COMMAND)) {
             handleWall(users, store, line);
-        } else if (line.indexOf(FOLLOWS_COMMAND) != -1) {
+        } else if (line.contains(FOLLOWS_COMMAND)) {
             handleFollows(users, line);
         } else {
             handleRead(users, store, line);
@@ -64,8 +64,12 @@ public class CommandParser {
      * TODO add help for commands here
      */
     private static void displayHelp() {
-        System.out.println("Add help for command syntax here....");
-
+        System.out.println("Commands:-");
+        System.out.println("to exit the system: 'quit'");
+        System.out.println("to post a message: <userid> -> <message>");
+        System.out.println("to follow a user: <your userid> follows <other userid>");
+        System.out.println("to read a users messages: <userId>");
+        System.out.println("to see a wall of messages: <userId> wall");
     }
 
     /**
@@ -73,9 +77,9 @@ public class CommandParser {
      * the command consists of a user id found in the users map then a read is performed, otherwise and error
      * is notified.</p>
      *
-     * @param users
-     * @param store
-     * @param line
+     * @param users map of users keyed on userid
+     * @param store message store
+     * @param line  command input
      */
     private static void handleRead(Map<String, User> users, MessageStore store, String line) {
         if (StringUtils.isEmpty(line)) {
@@ -95,11 +99,11 @@ public class CommandParser {
 
     /**
      * returns a list of valid messages for the user, including messages from followed users if includeFollowed set to true.
-     * @param users
-     * @param store
-     * @param userId
-     * @param includeFollowed
-     * @return
+     * @param users map of users keyed on userid
+     * @param store message store
+     * @param userId user id of user for which messages are required
+     * @param includeFollowed true if messages should include those posted by followed users
+     * @return list of valid messages
      */
     static List<Message> getUserMessages(Map<String, User> users, MessageStore store, String userId, boolean includeFollowed){
         List<Message> messages = new ArrayList<Message>();
@@ -119,9 +123,9 @@ public class CommandParser {
     /**
      * <p>returns true if the targetUserId identifies a user which is followed.</p>
      *
-     * @param userId
-     * @param users
-     * @param targetUserId
+     * @param userId id of user to check the list of users who they are following
+     * @param users map of users keyed on userid
+     * @param targetUserId potentially followed user
      * @return true if followed otherwise false.
      */
     static boolean posterIsFollowed(String userId, Map<String, User> users, String targetUserId) {
@@ -138,21 +142,21 @@ public class CommandParser {
     /**
      * <p>Formats the elapsed time from the message timestamp to the time of display.</p>
      *
-     * @param timestamp
-     * @return
+     * @param timestamp message timestamp to calculate elapsed time
+     * @return elapsed time suitably formatted
      */
     static String formatTime(DateTime timestamp) {
-        String formattedInterval = " ( ";
+        String formattedInterval;
         long elapsed = new DateTime().getMillis() - timestamp.getMillis();
         Long interval;
         if (elapsed < ONE_MINUTE) {
-            interval = new Long(elapsed / SECONDS_FACTOR);
+            interval = (elapsed / SECONDS_FACTOR);
             formattedInterval = formatInterval(interval, UNIT_SECOND);
         } else if (elapsed < ONE_HOUR) {
-            interval = new Long(elapsed / MINUTES_FACTOR);
+            interval = (elapsed / MINUTES_FACTOR);
             formattedInterval = formatInterval(interval, UNIT_MINUTE);
         } else {
-            interval = new Long(elapsed / HOURS_FACTOR);
+            interval = (elapsed / HOURS_FACTOR);
             formattedInterval = formatInterval(interval, UNIT_HOUR);
         }
 
@@ -162,12 +166,12 @@ public class CommandParser {
     /**
      * <p>Formats the units of time accounting for single units and units of second, minute and hour</p>
      *
-     * @param count
-     * @param unit
-     * @return
+     * @param count number of units
+     * @param unit type of unit
+     * @return suitably formatted string
      */
     static String formatInterval(Long count, String unit) {
-        StringBuffer formattedInterval = new StringBuffer();
+        StringBuilder formattedInterval = new StringBuilder();
         formattedInterval.append(" ( ");
         formattedInterval.append(count.toString());
         formattedInterval.append(" ");
@@ -182,8 +186,8 @@ public class CommandParser {
     /**
      * <p>handle the follows command</p>
      *
-     * @param users
-     * @param line
+     * @param users map of users keyed on userid
+     * @param line  command input
      */
     private static void handleFollows(Map<String, User> users, String line) {
         String userId = StringUtils.strip(line.substring(0, line.indexOf(FOLLOWS_COMMAND)));
@@ -201,30 +205,30 @@ public class CommandParser {
     /**
      * <p>handles the wall command.</p>
      *
-     * @param users
-     * @param store
-     * @param line
+     * @param users map of users keyed on userid
+     * @param store message store
+     * @param line  command input
      */
     private static void handleWall(Map<String, User> users, MessageStore store, String line) {
         String userId = StringUtils.strip(line.substring(0, line.indexOf(WALL_COMMAND)));
         for (Message message : getUserMessages(users, store, userId, true)) {
-            System.out.println(message.getMessage() + formatTime(message.getTimestamp()));
+            System.out.println(message.getUser().getId() + " - " + message.getMessage() + formatTime(message.getTimestamp()));
         }
     }
 
     /**
      * <p>handles the post (->) command.</p>
      *
-     * @param users
-     * @param store
-     * @param line
+     * @param users map of users keyed on userid
+     * @param store message store
+     * @param line  command input
      */
     private static void handlePost(Map<String, User> users, MessageStore store, String line) {
         String userId = StringUtils.strip(line.substring(0, line.indexOf(POST_COMMAND)));
         String message = StringUtils.strip(line.substring(line.indexOf(POST_COMMAND) + POST_COMMAND.length()));
         // we only want to handle this if we have both a userid and a message
         if (StringUtils.isNotEmpty(userId) && StringUtils.isNotEmpty(message)) {
-            User user = null;
+            User user;
             if (users.containsKey(userId)) {
                 user = users.get(userId);
             } else {

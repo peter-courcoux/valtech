@@ -33,6 +33,7 @@ public class User {
         return follows;
     }
 
+    @SuppressWarnings("unused")
     public void setFollows(Set<String> follows) {
         this.follows = follows;
     }

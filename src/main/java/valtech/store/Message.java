@@ -2,7 +2,6 @@ package valtech.store;
 
 import org.joda.time.DateTime;
 
-import javax.print.attribute.standard.DateTimeAtCompleted;
 
 /**
  * <p>Represents a message consisting of a user, a posting timestamp and a text message</p>

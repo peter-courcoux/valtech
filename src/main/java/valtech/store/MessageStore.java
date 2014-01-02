@@ -21,6 +21,7 @@ public class MessageStore {
         return messages;
     }
 
+    @SuppressWarnings("unused")
     public void setMessages(List<Message> messages) {
         this.messages = messages;
     }
