@@ -3,6 +3,8 @@ valtech
 
 scratch project for valtech
 
+tested on linux ubuntu 12.04 using java 7 hotspot server vm.
+
 build using maven 3 
 
 mvn clean install
